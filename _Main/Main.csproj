@@ -1,0 +1,17 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Barcode\Barcodes.csproj" />
+    <ProjectReference Include="..\Container\Container.csproj" />
+    <ProjectReference Include="..\Extension\Extensions.csproj" />
+    <ProjectReference Include="..\Thing\Things.csproj" />
+  </ItemGroup>
+
+</Project>
