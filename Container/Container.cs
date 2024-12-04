@@ -232,9 +232,7 @@ namespace Containers
         private void HandleIdChanged(object sender, IdChangeEventArgs args)
         {
             Console.WriteLine($"Товар изменил свой идентификатор с {args.OldId} на {args.NewId}");
-
-            // Здесь вы можете добавить логику для пересчета штрихкодов или QR-кодов
-            ChangeBarcode(); // Например, вызов метода для генерации нового штрихкода
+            ChangeBarcode(); 
         }
     }
 }
