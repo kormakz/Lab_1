@@ -1,6 +1,4 @@
-﻿using System.Runtime.CompilerServices;
-using System.Security.Cryptography;
-using Barcodes;
+﻿using Barcodes;
 using Events;
 
 namespace Things
@@ -14,7 +12,17 @@ namespace Things
 
         public event EventHandler<IdChangeEventArgs> IdChanged;
 
-        public virtual int Id { get => id; set { int old_id = id; id = value; barcode.Text = id.ToString();IdChanged?.Invoke(this, new IdChangeEventArgs(old_id, id)); } }
+        public virtual int Id
+        {
+            get => id;
+            set
+            {
+                int old_id = id;
+                id = value;
+                barcode.Text = id.ToString();
+                IdChanged?.Invoke(this, new IdChangeEventArgs(old_id, id));
+            }
+        }
         public string Name { get => name; set { name = value; } }
         public virtual string Barcode { get => barcode.Text; set { barcode.Text = value; } }
         public override string ToString()

@@ -2,12 +2,14 @@
 {
     using Barcodes;
     using Things;
+    using Containers;
+    using static System.Runtime.InteropServices.JavaScript.JSType;
+
     public static class Extension 
     {
-        public static void Id<T>(this T thing,int id) where T : IThing
+        public static void UpdateId<T>(this T thing,IContainer<T> container) where T : IThing
         {
-            thing.Id = id;
-            Console.WriteLine($"Товар {thing.Name} изменил свой идентификатор на: {thing.Id}");
+            thing.Barcode = thing.Id.ToString() + " " + container.Id + " " + container.SearchById(thing.Id);
         }
     }
 }

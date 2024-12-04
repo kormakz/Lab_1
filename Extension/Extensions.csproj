@@ -7,6 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\Container\Container.csproj" />
     <ProjectReference Include="..\Thing\Things.csproj" />
   </ItemGroup>
 

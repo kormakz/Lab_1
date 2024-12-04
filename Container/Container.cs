@@ -1,33 +1,23 @@
-﻿using Events;
+﻿using Container;
+using Events;
 using System;
+using System.ComponentModel;
 using System.Reflection;
 using Things;
 namespace Containers
 {
-    public class Container<T> : IContainer<T> where T : IThing
+    public class Container<T> : IContainer<T> where T : class, IThing
     {
         private int id;
         private int amount;
         private T[] cont;
-        private void ChangeBarcode(T thing, int number)
-        {
-            if (thing == null) return;
-            thing.Barcode = thing.Id.ToString() + " " + id + " " + number;
-        }
-        private void ChangeBarcode()
-        {
-            for (int i = 0; i < amount; i++)
-            {
-                //if (cont[i] != null)
-                ChangeBarcode(cont[i], i);
-            }
-        }
+      
         private Container(int amount)
         {
             this.amount = amount;
             cont = new T[amount];
         }
-        public Action<Container<T>> OnUpdate { get; set; }
+        private Action<IContainer<T>> OnUpdate { get; set; }
 
 
         public static implicit operator Container<T>(int amount)
@@ -39,9 +29,8 @@ namespace Containers
             get => id;
             set
             {
-                id = value;
+                id = value; 
                 OnUpdate?.Invoke(this);
-                ChangeBarcode();
             }
         }
 
@@ -50,18 +39,28 @@ namespace Containers
         {
             get
             {
-                if (index >= amount || index < 0) return default(T);
-                if (cont[index] == null) return default(T);
-                T tmp = cont[index]; 
+                if (index >= amount || index < 0) return null;
+                if (cont[index] == null) return null;
+                T tmp = cont[index];
                 //cont[index].IdChanged -= HandleIdChanged;
-                //cont[index] = default(T);
+                if (tmp != null)
+                {
+                    OnUpdate -= tmp.UpdateId;
+                    tmp.IdChanged -= HandleIdChanged;
+                }
+                cont[index] = null;
                 return tmp;
             }
             set
             {
                 if (index >= amount || index < 0) return;
                 cont[index] = value;
-                ChangeBarcode(cont[index], index);
+                if (value != null)
+                {
+                    value.UpdateId(this);
+                    OnUpdate += value.UpdateId;
+                    value.IdChanged += HandleIdChanged;
+                }
             }
         }
         public void Push(T thing)
@@ -72,7 +71,6 @@ namespace Containers
                 {
 
                     this[i] = thing;
-                    cont[i].IdChanged += HandleIdChanged;
                     return;
                 }
             }
@@ -85,56 +83,27 @@ namespace Containers
                 if (cont[i] != null)
                 {
                     tmp = cont[i];
-                    cont[i].IdChanged -= HandleIdChanged;
-                    cont[i] = default(T);
+                    cont[i] = null;
                     return tmp;
                 }
             }
-            return default(T);
+            return null;
         }
         public void Swap(int first, int second)
         {
             (this[first], this[second]) = (this[second], this[first]);
         }
-        //todo Часть 3,4 сделано
         public int Search(Predicate<T> func)
         {
-            //return Array.IndexOf(cont,func);
-
-            for (int i = 0; i < amount; i++)
-            {
-                if (func(cont[i]))
-                {
-                    return i;
-                }
-            }
-            return -1;
+            return cont.Where(x => x is { }).ToList().FindIndex(x => func(x));
         }
         public int SearchById(int id)
         {
             return Search(pr => pr.Id == id);
-
-            //for (int i = 0; i < amount; i++)
-            //{
-            //    if (cont[i].Id == id)
-            //    {
-            //        return i;
-            //    }
-            //}
-            //return -1;
         }
         public int SearchByName(string name)
         {
             return Search(pr => pr.Name == name);
-
-            //for (int i = 0; i < amount; i++)
-            //{
-            //    if (cont[i].Name == name)
-            //    {
-            //        return i;
-            //    }
-            //}
-            //return -1;
         }
         public void Sort(Func<int, int, int> func)
         {
@@ -151,64 +120,15 @@ namespace Containers
                     }
                 }
             }
-            //Array.Sort(cont, (x, y) =>
-            //{
-            //    if (x == null) return 1;
-            //    if (y == null) return -1;
-            //    return func(cont[0])
-            //    //x.Id.CompareTo(y.Id);
-            //});
-            ChangeBarcode();
+            OnUpdate?.Invoke(this);
         }
         public void SortById()
         {
             Sort((i, j) => cont[i].Id.CompareTo(cont[j].Id));
-            //for(int i = 0;i < amount; i++)
-            //{
-            //    for (int j = i + 1; j < amount; j++)
-            //    {
-            //        if (cont[j] != null && cont[i]!= null)
-            //        {
-            //            int temp = cont[i].Id.CompareTo(cont[j].Id);
-            //            if (temp == 1)
-            //            {
-            //                Swap(i, j);
-            //            }
-            //        }
-            //    }
-            //}
-            //Array.Sort(cont, (x, y) =>
-            //{
-            //    if (x == null) return 1;
-            //    if (y == null) return -1;
-            //    return x.Id.CompareTo(y.Id);
-            //});
-            //ChangeBarcode();
         }
         public void SortByName()
         {
             Sort((i, j) => cont[i].Name.CompareTo(cont[j].Name));
-            //for (int i = 0; i < amount; i++)
-            //{
-            //    for (int j = i + 1; j < amount; j++)
-            //    {
-            //        if (cont[j] != null && cont[i] != null)
-            //        {
-            //            int temp = cont[i].Name.CompareTo(cont[j].Name);
-            //            if (temp == 1)
-            //            {
-            //                Swap(i, j);
-            //            }
-            //        }
-            //    }
-            //}
-            //Array.Sort(cont, (x, y) =>
-            //{
-            //    if (x == null) return 1;
-            //    if (y == null) return -1;
-            //    return x.Name.CompareTo(y.Name);
-            //});
-            //ChangeBarcode();
         }
 
         public override string ToString()
@@ -231,8 +151,7 @@ namespace Containers
         }
         private void HandleIdChanged(object sender, IdChangeEventArgs args)
         {
-            Console.WriteLine($"Товар изменил свой идентификатор с {args.OldId} на {args.NewId}");
-            ChangeBarcode(); 
+            ((T)sender).UpdateId(this);
         }
     }
 }

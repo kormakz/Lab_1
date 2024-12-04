@@ -1,6 +1,5 @@
 ﻿using Containers;
 using Extensions;
-using System;
 using Things;
 static void TestLab2()
 {
@@ -74,7 +73,7 @@ static void TestLab4()
     Container<Thing> a = 10;
     //todo форматированный вывод
     //Action<Container<Thing>> delegato = a => Console.WriteLine($"Контейнер {nameof(a)} изменил свой идентификатор на: {a.Id}");
-    a.OnUpdate = a => Console.WriteLine($"Контейнер {nameof(a)} изменил свой идентификатор на: {a.Id}");
+    //a.OnUpdate = a => Console.WriteLine($"Контейнер {nameof(a)} изменил свой идентификатор на: {a.Id}");
     a.Id = 14;
     var lab3Data = new List<Thing>
     {
@@ -102,7 +101,7 @@ static void TestLab4()
 
     a.SortById();
     a[0].Id = 2; ;
-    a[0].Id(1);
+    //a[0].Id(1);
     Console.WriteLine(a);
 }
 
@@ -110,7 +109,6 @@ static void Lab4()
 {
     Console.WriteLine("Введите размер витрины: "); int capacity = Convert.ToInt32(Console.ReadLine());
     Container<IThing> container = capacity;
-    container.OnUpdate = container => Console.WriteLine($"Контейнер {nameof(container)} изменил свой идентификатор на: {container.Id}");
     Console.WriteLine("0 - добавить товар на витрину");
     Console.WriteLine("1 - Убрать товар из витрины");
     Console.WriteLine("2 - Поменять Id витрины");
@@ -152,7 +150,7 @@ static void Lab4()
                 break;
             case 1:
                 Console.Write("Введите место товара на витрине для удаления: "); int place = Convert.ToInt32(Console.ReadLine());
-                container[place] = default(IThing);
+                container[place] = null;
                 break;
             case 2:
                 Console.Write("Введите новый Id витрины: "); int new_container_id = Convert.ToInt32(Console.ReadLine());
@@ -161,7 +159,9 @@ static void Lab4()
             case 3:
                 Console.Write("Введите место товара на витрине для изменения Id: "); int place_id = Convert.ToInt32(Console.ReadLine());
                 Console.Write("Введите новый Id товара: "); int new_thing_id = Convert.ToInt32(Console.ReadLine());
-                container[place_id].Id = new_thing_id;
+                IThing tmp = container[place_id];
+                tmp.Id = new_thing_id;
+                container[place_id] = tmp;
                 break;
             case 4:
                 container.SortById();
@@ -184,4 +184,5 @@ static void Lab4()
         }
     }
 }
+
 Lab4();
